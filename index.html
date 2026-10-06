@@ -1,0 +1,205 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Structure Resource Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,400;1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* Layout: reference library, sticky size filter, sections rendered from data so the filter and the PDF share one source */
+:root{
+  --bg:#ffffff; --paper:#fbfaff; --ink:#1f1c3a; --muted:#5f5b7d;
+  --purple:#9895d3; --purple-deep:#3d3a7a; --lav:#efeefa;
+  --gold:#d09963; --gold-soft:#fbf4ec; --line:#e4e2f3; --deep:#1a1640; --on-deep:#ffffff;
+  --btn-bg:#3d3a7a; --btn-fg:#ffffff;
+  --display:"Playfair Display", Georgia, serif; --body:"DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#14122a; --paper:#1c1937; --ink:#efeefb; --muted:#b4b1d3; --purple:#aaa7e3; --purple-deep:#cfcdf3; --lav:#24214a;
+  --gold:#dcae7f; --gold-soft:#2a2238; --line:#36325f; --deep:#0d0b1f; --on-deep:#ffffff; --btn-bg:#cfcdf3; --btn-fg:#14122a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14122a; --paper:#1c1937; --ink:#efeefb; --muted:#b4b1d3; --purple:#aaa7e3; --purple-deep:#cfcdf3; --lav:#24214a;
+  --gold:#dcae7f; --gold-soft:#2a2238; --line:#36325f; --deep:#0d0b1f; --on-deep:#ffffff; --btn-bg:#cfcdf3; --btn-fg:#14122a; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6}
+.wrap{max-width:960px;margin:0 auto;padding-inline:20px;padding-block:0 40px;display:grid;gap:40px}
+h1,h2,h3{font-family:var(--display);color:var(--purple-deep);margin:0;text-wrap:balance}
+h1{font-style:italic;font-weight:500;font-size:clamp(2rem,5.5vw,3.1rem);line-height:1.1}
+h2{font-style:italic;font-weight:500;font-size:clamp(1.5rem,4vw,2.1rem)}
+h3{font-size:1.05rem}
+p{margin:0}
+ul{margin:0;padding-left:18px}
+li{margin-block:2px}
+.eyebrow{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;font-weight:700;color:var(--gold)}
+.note{font-size:.85rem;color:var(--muted)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+.bar-in{max-width:960px;margin:0 auto;padding:10px 20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.bar-in b{font-family:var(--display);font-style:italic;color:var(--purple-deep);font-weight:500}
+.seg{display:inline-flex;flex-wrap:wrap;gap:4px}
+.seg button{font:inherit;font-size:.82rem;font-weight:500;padding:6px 12px;border-radius:7px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--purple-deep);border-color:var(--purple-deep);color:var(--bg)}
+.btn{font:inherit;font-weight:700;font-size:.85rem;border:0;border-radius:8px;padding:9px 16px;background:var(--btn-bg);color:var(--btn-fg);cursor:pointer;margin-left:auto}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.hero{padding-top:44px;display:grid;gap:14px}
+.toc{display:flex;flex-wrap:wrap;gap:8px}
+.toc a{font-size:.8rem;text-decoration:none;color:var(--purple-deep);border:1px solid var(--line);border-radius:99px;padding:5px 12px;background:var(--paper)}
+section{display:grid;gap:14px;scroll-margin-top:64px}
+.exbar{background:var(--lav);border-radius:10px;padding:10px 16px;font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--purple-deep)}
+.callout{border:2px solid var(--gold);border-radius:12px;padding:16px 20px;background:var(--gold-soft);display:grid;gap:6px}
+.callout h3{color:var(--gold);font-style:italic;font-weight:500;font-size:1.15rem}
+.quote{background:var(--deep);color:var(--on-deep);border-radius:14px;padding:24px;font-family:var(--display);font-style:italic;font-size:clamp(1.15rem,3vw,1.45rem);line-height:1.35}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+.card{border:1px solid var(--line);border-radius:12px;background:var(--paper);padding:16px;display:grid;gap:8px;align-content:start;min-width:0}
+.card h3{font-style:italic;font-weight:500;font-size:1.3rem}
+.card .tag{font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--gold)}
+.card.hl{border:2px solid var(--purple)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:var(--purple-deep);background:var(--lav);padding:10px 12px}
+td{padding:10px 12px;border-top:1px solid var(--line);vertical-align:top}
+td.k{font-weight:700;color:var(--purple-deep);min-width:150px}
+.seatmap{display:grid;gap:6px;font-size:.88rem}
+.seatmap div{padding:7px 11px;border-radius:8px;background:var(--bg);border:1px solid var(--line)}
+.seatmap div.top{background:var(--purple-deep);color:var(--bg);border-color:var(--purple-deep)}
+.seatmap div.next{border:1.5px dashed var(--gold);color:var(--gold);font-weight:500}
+.sys{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.sys h3{grid-column:1/-1;padding:10px 14px;background:var(--lav);font-style:italic;font-weight:500;font-size:1.15rem}
+.sys div{padding:10px 12px;font-size:.84rem;border-top:1px solid var(--line);min-width:0}
+.sys div + div{border-left:1px solid var(--line)}
+.sys b{display:block;font-size:.66rem;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+@media (max-width:760px){.sys{grid-template-columns:1fr}.sys div + div{border-left:0}}
+footer{padding-top:18px;border-top:2px solid var(--gold);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;font-size:.8rem;color:var(--muted)}
+footer b{font-family:var(--display);font-style:italic;font-weight:500;color:var(--purple-deep);font-size:1rem}
+</style>
+
+<div class="bar"><div class="bar-in">
+  <b>Show me:</b>
+  <div class="seg" id="sizeSeg" role="group" aria-label="Program size"><button type="button" data-v="all" aria-pressed="true">All sizes</button><button type="button" data-v="0" aria-pressed="false">Family / group</button><button type="button" data-v="1" aria-pressed="false">Small</button><button type="button" data-v="2" aria-pressed="false">Medium</button><button type="button" data-v="3" aria-pressed="false">Large</button></div>
+  <button class="btn" type="button" id="pdfBtn">Download PDF</button>
+</div></div>
+
+<div class="wrap">
+<header class="hero">
+  <span class="eyebrow">Inner Circle · Leadership-Ready Business Blueprint™ Companion</span>
+  <h1>The Structure Resource Library</h1>
+  <p style="max-width:66ch">When I was a medium program, I couldn't find one example of what was realistic for a center my size. Then we grew, and I couldn't find one for large either. Everything was written for a giant chain or nothing at all. And family and group programs almost never see themselves in these resources. So here it is... by program size. Pick your size above and everything filters to you. Look one size up to see where you're going.</p>
+  <p class="note" id="pdfNote" aria-live="polite"></p>
+  <nav class="toc" aria-label="Library sections">
+    <a href="#size">1. Program sizes</a><a href="#functions">2. Functions by size</a><a href="#seats">3. Seats by size</a><a href="#rhythms">4. Rhythms by size</a><a href="#systems">5. Systems library</a><a href="#acct">6. Accountability toolkit</a><a href="#own">7. Task to ownership</a>
+  </nav>
+</header>
+
+<section id="size"><h2>1. Which size are you?</h2><div class="cards" id="sizeCards"></div>
+  <div class="callout"><h3>Build one size ahead</h3><p>Your structure should reflect the business you're becoming, not just where you started. Run today's size well, and start building the next size's seats and rhythms before growth forces you to.</p></div></section>
+<section id="functions"><h2>2. The 8 functions by program size</h2><p class="note">Who typically owns each function. Your titles may differ by state and program type. What matters is that each function has one clear owner.</p><div class="tbl-wrap"><table id="fnTbl"></table></div></section>
+<section id="seats"><h2>3. Seats by program size</h2><p class="note">Seats before names. Dashed gold is the next seat to build at that size.</p><div class="cards" id="seatCards"></div></section>
+<section id="rhythms"><h2>4. Operating rhythms by program size</h2>
+  <div class="quote">If the only reminder that something needs to happen is you remembering it... that's not a system yet.</div>
+  <p class="note">Each size includes everything from the size before it. Start with 2-3 you're not doing yet.</p><div class="tbl-wrap"><table id="rhTbl"></table></div></section>
+<section id="systems"><h2>5. Systems library</h2><p class="note">Every working system has five parts: Trigger → Owner → Process → Proof → Follow-up. An SOP sitting in a folder is only the process. Use these as starting points, then make them yours.</p><div id="sysList" style="display:grid;gap:12px"></div></section>
+<section id="acct"><h2>6. Accountability toolkit</h2>
+  <div class="callout"><h3>Assign → Support → Verify → Coach</h3><p>Assign what they own. Support with training, tools, SOPs, and authority. Verify with a measure. Coach the gaps and develop the person.</p></div>
+  <div class="exbar">Accountability mechanisms</div><div class="cards" id="mechCards"></div>
+  <div class="exbar">Sample KPIs by function</div><div class="tbl-wrap"><table id="kpiTbl"></table></div></section>
+<section id="own"><h2>7. Task → Responsibility → Ownership</h2><p class="note">Use these as models when you write role ownership cards.</p><div class="tbl-wrap"><table id="ownTbl"></table></div>
+  <div class="callout"><h3>Coming in your 1:1</h3><p>Current and future org chart · Role ownership cards · Responsibility transfer matrix · Leadership scorecard · Delegation tracker · 30/60/90 development plan</p></div></section>
+
+<footer><b>Consulting with AJR</b><span>consultingwithajr.com · Inner Circle resource</span></footer>
+</div>
+
+<script>
+(function(){
+const $=id=>document.getElementById(id);
+const SZ=['Family / group','Small','Medium','Large / multi-site'];
+const SIZE=[
+ ['Family / group','About 8-12 children · you plus 1-2 assistants','You\'re the teacher, cook, director, and bookkeeper, often in your own home.','You need: routines an assistant can run without you, a trusted substitute list, and outside help for billing and taxes.'],
+ ['Small','Up to about 40 children · under 10 staff','You\'re the owner AND the director. You open, you close, you answer every call.','You need: a "person in charge" who can run the day without you, and outside help for payroll and books.'],
+ ['Medium','About 40-100 children · 10-25 staff','You have a Director and maybe an assistant, but most decisions still find their way back to you.','You need: clear lines between Director and Asst. Director / Group Supervisor, weekly leadership rhythm, and documented systems.'],
+ ['Large / multi-site','100+ children or more than one site · 25+ staff','You have a leadership team. Your risk is inconsistency between people and sites.','You need: a leadership team with scorecards, an Ed Coordinator, org-wide systems, and a path for you out of daily operations.']];
+const FN=[
+ ['Education + Quality',['You, with your assistant supporting','Owner with lead teachers','Director or Group Supervisor / Asst. Director','Education Coordinator with site directors']],
+ ['People + Culture',['You','Owner','Director hires; Asst. Director schedules','HR / Operations lead + site directors; CEO owns culture']],
+ ['Enrollment + Family Experience',['You','Owner','Director + admin assistant','Enrollment & Family Coordinator; directors own retention']],
+ ['Compliance + Safety',['You, with an assistant trained on daily checks','Owner with checklists; lead teachers on daily ratios','Director; Asst. Director runs audits','Site directors accountable; admin audits; Asst. Directors daily']],
+ ['Finance',['You + tax preparer or payroll app','Owner + outside bookkeeper / payroll service','Owner + bookkeeper; Director builds weekly revenue','Billing / finance lead + bookkeeper + CPA; CEO reviews']],
+ ['Operations',['You + assistant (meals, cleaning rotation)','Owner + opening/closing rotation','Asst. Director or admin + cook','Operations Manager + facilities vendors + food lead']],
+ ['Marketing + Growth',['You (+ VA or family help)','Owner + VA','Owner + VA or admin','Marketing VA / coordinator; CEO owns partnerships and expansion']],
+ ['CEO + Strategy',['You (always)','Owner (always)','Owner / CEO','CEO with leadership team and advisors']]];
+const SEATS=[
+ {seats:['Owner / Provider','Assistant(s)','Substitute list'],next:'An assistant who can run the day without you',support:'Tax preparer or payroll app, VA or family help'},
+ {seats:['Owner / Director','Lead Teacher(s)','Assistant Teachers'],next:'Director or "person in charge" who can open, close, and run the day',support:'Outside bookkeeper or payroll service, VA'},
+ {seats:['Owner / CEO','Director','Asst. Director or Group Supervisor · Admin / Enrollment','Lead Teachers → Assistants · Cook'],next:'Education Coordinator, or an Asst. Director who owns classrooms so the Director owns the building',support:'Bookkeeper, VA'},
+ {seats:['CEO','Site Director(s) · Education Coordinator · Operations / HR · Billing & Finance · Enrollment & Family','Asst. Directors · Admin per site','Lead Teachers → Assistants & Floaters'],next:'Executive or Operations Director so the CEO steps out of daily operations',support:'Bookkeeper, CPA, VA, advisors'}];
+const RH=[
+ ['Daily',['Arrival health check · Attendance and ratio · Opening/closing checklist · Parent updates sent','Opening/closing checklist · Ratio and attendance check · Walk every room once · Family app updates sent · Sign-in/out review','Everything in small, plus: 10-minute leadership huddle · Coverage plan set before 8am · Director reviews incident reports same day · Asst. Director room walk-through with notes','Everything in medium, per site, plus: Daily dashboard (attendance, ratios, call-outs, incidents) to each Director · CEO gets escalations only, not daily operations']],
+ ['Weekly',['30-minute CEO hour: billing, receivables, next week · Meal plan and shopping · Lesson plan for the week','One protected CEO hour for numbers and planning · Receivables check · Next week\'s staff schedule · Lesson plans turned in · One classroom observation','Leadership meeting (same day, time, agenda) · Director builds weekly revenue and enrollment report · Enrollment pipeline (inquiries, tours, starts) · Classroom walkthroughs with follow-up dates · Food / CACFP documentation · Lesson plan review','Leadership team meeting with a scorecard · Revenue and pipeline by site · Director ↔ Asst. Director coaching check-ins · Payroll review · Education Coordinator observation schedule']],
+ ['Monthly',['Fire drill and log · Check every child file · Tuition and subsidy reconciliation · Income vs. expenses','Fire drill and log · Check every file (you\'re small enough) · Budget vs. actual · Tuition and subsidy reconciliation · One staff training topic · Facility and supply walk-through','10% child and staff file audit · Revenue and expense review with bookkeeper · Capacity vs. enrolled by room · Pop-up staff workshops · Facility and safety checklist · Staff meeting','10% file audit per site with a correction log · Drills at every site · P&L by site · Leadership development session · Turnover and vacancy review · Capacity by room and site']],
+ ['Quarterly',['Developmental screening per child · Family conference or event · Compliance self-check · 90-day priorities','Formal observation for each teacher · Set 90-day priorities · Family engagement event · Compliance self-audit · Check-in with every staff member','90-day PD plan for every staff member (3 topics each) · Formal observations · Full mock inspection walk-through · Family survey · Priorities reset with Director · Staff development review','Quarterly planning day with leadership team · Coaching cycles · Mock inspection per site · Promotions and leadership-level review · Family survey · Advisor check-in']],
+ ['Annually',['License renewal · Handbook and policy update · Rate review · Budget · Required trainings','License renewal and inspection prep · Handbook and policy update · Budget · Annual trainings tracked · Tuition rate review · Annual plan','Everything in small, plus: Performance reviews · Benefits review · Enrollment strategy for fall and summer · All-staff orientation · STARS / QRIS renewal','Everything in medium, plus: Annual planning retreat · Org chart and seat review · Compensation structure · 3-year strategic plan · CPA audit and taxes · Succession planning']]];
+const SYS=[
+ ['Opening and closing','Every open and close','Opener/closer on rotation (small) · Asst. Director (medium/large)','Checklist: doors, temps, ratios, sign-in, alarms, lights','Signed checklist','Missed items reported to Director same day'],
+ ['Ratios and active supervision','Every transition, plus a set check each hour','Lead Teacher; verified by Asst. Director','Count, call, confirm. Coverage plan for breaks and call-outs','Ratio log','Immediate coverage call, then coaching'],
+ ['Incident and accident reporting','Any injury or incident','Teacher who saw it','Care first, complete form, notify family same day, Director signs','Signed report within 24 hours','Monthly pattern review'],
+ ['Staff file compliance','First week of every month','Director','Audit 10% of staff files against the checklist','Compliance tracker completed','Missing documentation assigned with a deadline'],
+ ['Child file compliance','Before day one, then monthly','Admin or Director','Enrollment checklist · 10% audit · expiration tracker for physicals and immunizations','Tracker updated','Family notice with a deadline'],
+ ['Inquiry to enrollment','Inquiry received','Enrollment owner','Respond within 24 hours · tour · follow up within 48 hours · enrollment packet','Inquiry tracker','Weekly conversion review'],
+ ['Family onboarding (first 30 days)','Enrollment confirmed','Director + Lead Teacher','Orientation · day-1 call · week-2 check-in · day-30 conversation','Checklist in child file','Concerns escalated to Director'],
+ ['Tuition billing and collections','Weekly billing day','Billing / admin','Invoices · reminders at day 3 and 7 · late fee per policy','Aging report','Payment plan or Director meeting at day 14'],
+ ['Subsidy and funding paperwork','Monthly attendance submission + recertification dates','Billing / admin','Submit attendance · track recert dates · remind families 30 days out','Submission confirmations','Lost-payment review monthly'],
+ ['Hiring','Vacancy, or a 30-day staffing forecast','Director','Post · screen · interview · working interview in a classroom · clearances','Hiring checklist','30/60/90-day check-ins'],
+ ['New staff onboarding (first 6 weeks)','Start date','Director + mentor teacher','Safety, compliance, and classroom management first. Mentor assigned','Signed onboarding checklist','45-day check-in'],
+ ['Observation and coaching','Weekly schedule','Group Supervisor / Education Coordinator','Observe · notes · feedback · set a follow-up date','Observation form','Re-observe by the follow-up date'],
+ ['Developmental screening (ASQ)','Child enrollment','Lead Teacher; Education Coordinator reviews','Observe first 30 days · complete by day 45 · review · family conversation','Completed screening in file','Referral and follow-up plan when scores are low'],
+ ['Lesson planning','Due each Thursday for next week','Lead Teachers; Group Supervisor reviews by Friday','Plan · submit · review · post in room','Approved plan posted','Observation checks the plan is happening']];
+const MECH=[['Checklist','Proves a routine happened.','Opening/closing checklist'],['Scorecard','5-10 weekly numbers per seat or team.','Director scorecard reviewed in leadership meeting'],['Observation','Proves quality, not just completion.','Weekly classroom observation with notes'],['Dashboard','Lets you see without asking.','Enrollment and revenue by site'],['Weekly meeting','Where numbers and issues get owners and dates.','Leadership meeting, same day and time'],['Audit','Checks a sample on a schedule.','10% file audit monthly'],['KPI','One number that says a function is winning.','Inquiry-to-enrollment conversion'],['Follow-up date','Turns feedback into accountability.','"I\'ll be back in your room Thursday"']];
+const KPI=[['Education + Quality','% of observations completed on schedule · screenings completed by day 45'],['People + Culture','90-day retention of new hires · % of staff with current required trainings'],['Enrollment + Family','Enrollment as % of capacity · inquiry → tour → enrollment conversion'],['Compliance + Safety','% of files compliant · repeat citations (goal: zero)'],['Finance','Weekly revenue vs. target · receivables over 30 days · payroll as % of revenue'],['Operations','% of checklists completed · CACFP claim submitted on time'],['Marketing + Growth','Inquiries per week · top referral sources'],['CEO + Strategy','Net profit % · months of cash reserve']];
+const OWN=[['Check the staff files.','Complete the monthly staff file audit.','Maintain compliant staff files and ensure deficiencies are corrected within the required timeframe.'],['Call back the parent who inquired.','Follow up on every inquiry within 24 hours.','Keep enrollment at or above target by converting inquiries into enrolled families.'],['Look at the lesson plans.','Review all lesson plans every Friday.','Ensure every classroom runs intentional, aligned lessons that show up in the room.'],['Send the tuition reminders.','Run the weekly collections process.','Keep receivables over 30 days below our target.'],['Cover Room 3 today.','Build the daily coverage plan.','Keep every room in ratio, every day, without the owner stepping in.'],['Tell the new hire where things are.','Lead the first 6 weeks of onboarding.','Ensure new staff are safe, confident, and retained past 90 days.']];
+
+let size='all';
+const cols=()=>size==='all'?[0,1,2,3]:[+size];
+function render(){
+  $('sizeCards').innerHTML=SIZE.map((s,i)=>`<div class="card ${size!=='all'&&+size===i?'hl':''}"><span class="tag">${s[1]}</span><h3>${s[0]}</h3><p>${s[2]}</p><p class="note">${s[3]}</p></div>`).join('');
+  const c=cols();
+  $('fnTbl').innerHTML=`<thead><tr><th>Function</th>${c.map(i=>`<th>${SZ[i]}</th>`).join('')}</tr></thead><tbody>${FN.map(f=>`<tr><td class="k">${f[0]}</td>${c.map(i=>`<td>${f[1][i]}</td>`).join('')}</tr>`).join('')}</tbody>`;
+  $('seatCards').innerHTML=c.map(i=>`<div class="card"><h3>${SZ[i]}</h3><div class="seatmap">${SEATS[i].seats.map((s,k)=>`<div class="${k===0?'top':''}">${s}</div>`).join('')}<div class="next">Next seat: ${SEATS[i].next}</div></div><p class="note">Support: ${SEATS[i].support}</p></div>`).join('');
+  $('rhTbl').innerHTML=`<thead><tr><th>Cadence</th>${c.map(i=>`<th>${SZ[i]}</th>`).join('')}</tr></thead><tbody>${RH.map(r=>`<tr><td class="k">${r[0]}</td>${c.map(i=>`<td><ul>${r[1][i].split(' · ').map(x=>`<li>${x}</li>`).join('')}</ul></td>`).join('')}</tr>`).join('')}</tbody>`;
+}
+$('sysList').innerHTML=SYS.map(s=>`<div class="sys"><h3>${s[0]}</h3><div><b>Trigger</b>${s[1]}</div><div><b>Owner</b>${s[2]}</div><div><b>Process</b>${s[3]}</div><div><b>Proof</b>${s[4]}</div><div><b>Follow-up</b>${s[5]}</div></div>`).join('');
+$('mechCards').innerHTML=MECH.map(m=>`<div class="card"><h3>${m[0]}</h3><p>${m[1]}</p><p class="note">Example: ${m[2]}</p></div>`).join('');
+$('kpiTbl').innerHTML=`<thead><tr><th>Function</th><th>Sample KPIs</th></tr></thead><tbody>${KPI.map(k=>`<tr><td class="k">${k[0]}</td><td>${k[1]}</td></tr>`).join('')}</tbody>`;
+$('ownTbl').innerHTML=`<thead><tr><th>Task</th><th>Responsibility</th><th>Ownership</th></tr></thead><tbody>${OWN.map(o=>`<tr><td>${o[0]}</td><td>${o[1]}</td><td><strong>${o[2]}</strong></td></tr>`).join('')}</tbody>`;
+$('sizeSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;size=b.dataset.v;$('sizeSeg').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));try{localStorage.setItem('ajr-lib-size',size)}catch(err){}render();});
+try{const s=localStorage.getItem('ajr-lib-size');if(s){size=s;$('sizeSeg').querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===s)));}}catch(e){}
+render();
+
+/* PDF */
+let downloads=null;
+if(window.claude&&window.claude.use){window.claude.use('downloads').then(d=>{downloads=d;}).catch(()=>{});}
+const clean=s=>String(s).replace(/[‘’]/g,"'").replace(/[“”]/g,'"').replace(/…/g,'...').replace(/[–—]/g,'-').replace(/→/g,'>').replace(/↔/g,'<>').replace(/[^\x00-\xFF]/g,'');
+$('pdfBtn').onclick=async()=>{
+  const note=$('pdfNote');
+  if(!window.jspdf){note.textContent='The PDF tool didn\'t load. Refresh and try again.';return;}
+  if(!downloads){note.textContent='PDF download isn\'t available in this view. Open the library in your browser to download.';return;}
+  const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'pt',format:'letter'});
+  const W=612,M=48,CW=W-M*2;let y=0;const PURPLE=[61,58,122],LAV=[239,238,250],GOLD=[208,153,99],INK=[31,28,58],MUTED=[95,91,125];
+  const need=h=>{if(y+h>792-56){doc.addPage();y=M;}};
+  const H=t=>{need(50);y+=6;doc.setFillColor(...LAV);doc.roundedRect(M,y,CW,26,4,4,'F');doc.setTextColor(...PURPLE);doc.setFont('times','bolditalic');doc.setFontSize(13);doc.text(clean(t),M+10,y+17);y+=38;};
+  const K=t=>{const L=doc.splitTextToSize(clean(t),CW);need(L.length*12+4);doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(...GOLD);doc.text(L,M,y);y+=L.length*12+2;};
+  const T=(t,ind=0)=>{const L=doc.splitTextToSize(clean(t),CW-ind);need(L.length*13+4);doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(...INK);doc.text(L,M+ind,y);y+=L.length*13+4;};
+  doc.setFillColor(...PURPLE);doc.rect(0,0,W,110,'F');doc.setTextColor(...GOLD);doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text('INNER CIRCLE  |  LEADERSHIP-READY BUSINESS BLUEPRINT COMPANION',M,40);
+  doc.setTextColor(255,255,255);doc.setFont('times','bolditalic');doc.setFontSize(24);doc.text('The Structure Resource Library',M,74);
+  y=140;const c=cols();T('Showing: '+(size==='all'?'All program sizes':SZ[+size]));y+=6;
+  H('1. Program sizes');SIZE.forEach(s=>{K(s[0]+'  |  '+s[1]);T(s[2],10);T(s[3],10);});
+  H('2. The 8 functions by program size');FN.forEach(f=>{K(f[0]);c.forEach(i=>T(SZ[i]+': '+f[1][i],10));});
+  H('3. Seats by program size');c.forEach(i=>{K(SZ[i]);T(SEATS[i].seats.join('  >  '),10);T('Next seat: '+SEATS[i].next,10);T('Support: '+SEATS[i].support,10);});
+  H('4. Operating rhythms by program size');RH.forEach(r=>{K(r[0]);c.forEach(i=>T(SZ[i]+': '+r[1][i],10));});
+  H('5. Systems library');SYS.forEach(s=>{K(s[0]);T(`Trigger: ${s[1]}  |  Owner: ${s[2]}`,10);T(`Process: ${s[3]}`,10);T(`Proof: ${s[4]}  |  Follow-up: ${s[5]}`,10);});
+  H('6. Accountability toolkit');T('Assign > Support > Verify > Coach');MECH.forEach(m=>T(`${m[0]}: ${m[1]} Example: ${m[2]}`,10));K('Sample KPIs');KPI.forEach(k=>T(`${k[0]}: ${k[1]}`,10));
+  H('7. Task > Responsibility > Ownership');OWN.forEach(o=>{T('Task: '+o[0],10);T('Responsibility: '+o[1],10);K('Ownership: '+o[2]);y+=4;});
+  const n=doc.getNumberOfPages();for(let p=1;p<=n;p++){doc.setPage(p);doc.setDrawColor(...GOLD);doc.line(M,758,W-M,758);doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(...MUTED);doc.text('consultingwithajr.com  |  Consulting with AJR',M,772);doc.text(`Page ${p} of ${n}`,W-M,772,{align:'right'});}
+  try{await downloads.save({filename:`AJR-Structure-Resource-Library${size==='all'?'':'-'+SZ[+size].split(' ')[0]}.pdf`,data:doc.output('blob')});note.textContent='PDF saved.';}
+  catch(err){note.textContent=err&&err.code==='declined'?'Download canceled.':'PDF download isn\'t available here right now.';}
+};
+})();
+</script>
+
+</body></html>
